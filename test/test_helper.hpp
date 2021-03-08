@@ -14,7 +14,7 @@
 #ifdef OOOPSI_WINDOWS
 #include <windows.h>
 #endif
-#ifdef OOOPSI_LINUX
+#if defined(OOOPSI_LINUX) || defined(OOOPSI_MAC)
 #include <sys/mman.h>
 #include <unistd.h>
 #endif

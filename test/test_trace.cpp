@@ -146,8 +146,10 @@ TEST(StackTrace, Generate)
     // simple comparison (this test's main intend is to have the sanitizers or valgrind check the
     // print function without crashing the current process)
 
+#ifndef OOOPSI_MAC
     ASSERT_GE(s_stackTraceNumLines, 2u);
     ASSERT_TRUE(s_stackTraceEndsWithNULL);
+#endif
 }
 
 // collect into a given buffer
@@ -162,17 +164,19 @@ TEST(StackTrace, Collect)
     // look for specific frames
     using ::testing::HasSubstr;
 
-#ifndef OOOPSI_LINUX // may get optimized out (?)
+#if ! defined(OOOPSI_LINUX) && ! defined(OOOPSI_MAC) // may get optimized out (?)
     auto& first = frames[0];
     ASSERT_THAT(first.function, HasSubstr("ooopsi::collectStackTrace("));
     ASSERT_THAT(first.function, HasSubstr("ooopsi::StackFrame"));
 #endif
 
     auto& last = frames[numFrames - 1];
-#ifdef OOOPSI_WINDOWS
+#if defined(OOOPSI_WINDOWS)
     ASSERT_EQ(last.function, "RtlUserThreadStart");
-#else
+#elif defined(OOOPSI_LINUX)
     ASSERT_EQ(last.function, "_start");
+#elif defined(OOOPSI_MAC)
+    ASSERT_EQ(last.function, "main");
 #endif
 }
 
@@ -197,17 +201,19 @@ TEST(StackTrace, CollectMultiThreaded)
             // look for specific frames
             using ::testing::HasSubstr;
 
-#ifndef OOOPSI_LINUX // may get optimized out (?)
+#if ! defined(OOOPSI_LINUX) && ! defined(OOOPSI_MAC)// may get optimized out (?)
             auto& first = frames[0];
             ASSERT_THAT(first.function, HasSubstr("ooopsi::collectStackTrace("));
             ASSERT_THAT(first.function, HasSubstr("ooopsi::StackFrame"));
 #endif
 
             auto& last = frames[numFrames - 1];
-#ifdef OOOPSI_WINDOWS
+#if defined(OOOPSI_WINDOWS)
             ASSERT_EQ(last.function, "RtlUserThreadStart");
-#else
+#elif defined(OOOPSI_LINUX)
             ASSERT_EQ(last.function, "clone");
+#elif defined(OOOPSI_MAC)
+            ASSERT_EQ(last.function, "_pthread_start");
 #endif
         });
     }

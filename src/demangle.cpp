@@ -32,7 +32,7 @@ std::string demangle(const char* symbol)
         return result;
     }
 
-#ifdef _CXXABI_H
+#if defined(_CXXABI_H) || defined (__CXXABI_H)
 
     // call GCC's demangler - will allocate a proper buffer
     int status = 0;

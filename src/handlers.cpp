@@ -17,7 +17,7 @@
 #ifdef OOOPSI_WINDOWS
 #include <windows.h>
 #endif
-#ifdef OOOPSI_LINUX
+#if defined(OOOPSI_LINUX) || defined(OOOPSI_MAC)
 #include <sys/ucontext.h>
 #endif
 
@@ -31,7 +31,7 @@ static bool s_forceDemangling = false;
 inline AbortSettings makeSettings(bool inSignalHandler = false) noexcept
 {
     AbortSettings settings;
-#ifdef OOOPSI_LINUX
+#if defined(OOOPSI_LINUX) || defined(OOOPSI_MAC)
     settings.demangleNames = !inSignalHandler || s_forceDemangling;
 #else
     std::ignore = inSignalHandler;
@@ -249,8 +249,13 @@ static std::array<uint8_t, s_ALT_STACK_SIZE> s_ALT_STACK;
     auto* context = static_cast<const ucontext_t*>(ctx);
     if (context != nullptr)
     {
+#ifdef OOOPSI_MAC
+        static_assert(sizeof(__darwin_x86_exception_state64().__faultvaddr) == sizeof(pointer_t), "something is odd here...");
+        faultAddr = reinterpret_cast<const pointer_t*>(context->uc_mcontext->__es.__faultvaddr);
+#else
         static_assert(sizeof(greg_t) == sizeof(pointer_t), "something is odd here...");
         faultAddr = reinterpret_cast<const pointer_t*>(&context->uc_mcontext.gregs[REG_RIP]);
+#endif
     }
 
     switch (sig)
@@ -273,7 +278,11 @@ static std::array<uint8_t, s_ALT_STACK_SIZE> s_ALT_STACK;
                 // Let's try to distinguish the usual "segmentation fault" from a
                 // "stack overflow": Check if the address causing the fault is "slightly"
                 // past the end of the stack.
+#ifdef OOOPSI_MAC
+                auto stackPtr = static_cast<uintptr_t>(context->uc_mcontext->__ss.__rip);
+#else
                 auto stackPtr = static_cast<uintptr_t>(context->uc_mcontext.gregs[REG_RSP]);
+#endif
                 auto stackAddr = reinterpret_cast<uintptr_t>(info->si_addr);
                 constexpr auto rangeLimit = 2048u;
                 if (stackPtr - stackAddr < rangeLimit)
@@ -315,12 +324,14 @@ static std::array<uint8_t, s_ALT_STACK_SIZE> s_ALT_STACK;
         case BUS_OBJERR:
             detail = "object-specific hardware error";
             break;
+#ifndef OOOPSI_MAC
         case BUS_MCEERR_AR:
             detail = "hardware memory error consumed on a machine check";
             break;
         case BUS_MCEERR_AO:
             detail = "hardware memory error detected in process but not consumed";
             break;
+#endif // ndef OOOPSI_MAC
         default:
             break;
         }

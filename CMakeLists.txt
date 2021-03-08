@@ -56,7 +56,7 @@ target_link_libraries(crasher_ooopsi ooopsi)
 target_compile_options(crasher_ooopsi PRIVATE -DUSE_OOOPSI)
 
 # add libunwind for all *NIX systems
-if(UNIX)
+if(LINUX)
     find_library(LIBUNWIND_LIB_PLA  unwind-x86_64)
     find_library(LIBUNWIND_LIB_MAIN unwind)
     if(NOT LIBUNWIND_LIB_PLA OR NOT LIBUNWIND_LIB_MAIN)
