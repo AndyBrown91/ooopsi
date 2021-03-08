@@ -95,7 +95,7 @@ OOOPSI_FORCE_INLINE size_t collectStackTrace(Func&& handler,
         SymCleanup(thisProc);
     }
 
-#elif defined(OOOPSI_LINUX)
+#elif defined(OOOPSI_LINUX) || defined(OOOPSI_MAC)
 
     unw_cursor_t cursor;
     unw_context_t context;
@@ -132,7 +132,7 @@ OOOPSI_FORCE_INLINE size_t collectStackTrace(Func&& handler,
 
 #error "Unsupported platform!"
 
-#endif // OOOPSI_WINDOWS/LINUX
+#endif // OOOPSI_WINDOWS/LINUX/MACOS
 
     return numberOfFrames;
 }

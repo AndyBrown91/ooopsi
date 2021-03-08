@@ -13,7 +13,7 @@
 #include "internal.hpp"
 
 // For Windows, see 'handlers.cpp' - these are covered by the onTerminate(//onPureCall() functions.
-#ifdef OOOPSI_LINUX
+#if defined(OOOPSI_LINUX) || defined(OOOPSI_MAC)
 #include <cxxabi.h>
 
 /*
@@ -39,4 +39,4 @@ void __cxxabiv1::__cxa_deleted_virtual()
     ooopsi::abort(reason);
 }
 
-#endif // OOOPSI_LINUX
+#endif // OOOPSI_LINUX || OOOPSI_MAC

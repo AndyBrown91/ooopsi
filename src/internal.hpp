@@ -45,6 +45,10 @@
 #define OOOPSI_MSVC
 #endif
 
+#if defined (__APPLE_CPP__) || defined (__APPLE_CC__)
+#define OOOPSI_MAC
+#endif
+
 
 #ifdef OOOPSI_WINDOWS
 #include <windows.h>
@@ -54,7 +58,11 @@ namespace ooopsi
 {
 
 /// reserve 16KB alternate stack, allowing to put some text buffers on it
+#ifdef OOOPSI_MAC
+static constexpr size_t s_ALT_STACK_SIZE = 32 * 1024;
+#else
 static constexpr size_t s_ALT_STACK_SIZE = 16 * 1024;
+#endif
 
 /// limits the length of the trace
 static constexpr size_t s_MAX_STACK_FRAMES = 128;

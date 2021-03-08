@@ -82,7 +82,11 @@ static std::string makeBtRegexTerm(const char* prefix, const char* reason)
 
 #define LINENUM_REGEX "[0-9]+"
 // ensure that known symbols are found
+#ifdef OOOPSI_MAC
+#define BACKTRACE_REGEX ".*BACKTRACE.*main.*"
+#else
 #define BACKTRACE_REGEX ".*BACKTRACE.*__libc_start_main.*"
+#endif
 // different call stack for std::terminate() on clang
 #ifdef OOOPSI_CLANG
 #define BACKTRACE_REGEX_TERMINATE ".*BACKTRACE.*__clang_call_terminate.*"
@@ -124,7 +128,7 @@ TEST(Abort, AbortDeath)
 
 TEST(Abort, StdAbortDeath)
 {
-    ASSERT_DEATH(std::abort(), makeBtRegex("!!! TERMINATING DUE TO std::abort\\(\\)"));
+    ASSERT_DEATH(std::abort(), "!!! TERMINATING DUE TO std::abort\\(\\)");
 }
 
 TEST(Abort, TerminateDeath)
