@@ -626,6 +626,6 @@ HandlerSetup::~HandlerSetup() = default;
 
 /// static instance for RAII-style setup
 /// (not working when linking statically though...)
-static HandlerSetup s_setup;
+//static HandlerSetup s_setup;
 
 } // namespace ooopsi
