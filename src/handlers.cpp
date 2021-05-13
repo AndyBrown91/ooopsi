@@ -250,8 +250,13 @@ static std::array<uint8_t, s_ALT_STACK_SIZE> s_ALT_STACK;
     if (context != nullptr)
     {
 #ifdef OOOPSI_MAC
+#ifdef OOOPSI_MAC_ARM
+        static_assert(sizeof(__darwin_arm_exception_state64().__far) == sizeof(pointer_t), "something is odd here...");
+        faultAddr = reinterpret_cast<const pointer_t*>(context->uc_mcontext->__es.__far);
+#else
         static_assert(sizeof(__darwin_x86_exception_state64().__faultvaddr) == sizeof(pointer_t), "something is odd here...");
         faultAddr = reinterpret_cast<const pointer_t*>(context->uc_mcontext->__es.__faultvaddr);
+#endif
 #else
         static_assert(sizeof(greg_t) == sizeof(pointer_t), "something is odd here...");
         faultAddr = reinterpret_cast<const pointer_t*>(&context->uc_mcontext.gregs[REG_RIP]);
@@ -279,7 +284,12 @@ static std::array<uint8_t, s_ALT_STACK_SIZE> s_ALT_STACK;
                 // "stack overflow": Check if the address causing the fault is "slightly"
                 // past the end of the stack.
 #ifdef OOOPSI_MAC
+#ifdef OOOPSI_MAC_ARM
+                auto stackPtr = static_cast<uintptr_t>(context->uc_mcontext->__ss.__pc);
+#else
                 auto stackPtr = static_cast<uintptr_t>(context->uc_mcontext->__ss.__rip);
+#endif
+
 #else
                 auto stackPtr = static_cast<uintptr_t>(context->uc_mcontext.gregs[REG_RSP]);
 #endif
