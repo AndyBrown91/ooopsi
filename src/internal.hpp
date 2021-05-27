@@ -47,6 +47,11 @@
 
 #if defined (__APPLE_CPP__) || defined (__APPLE_CC__)
 #define OOOPSI_MAC
+
+#if defined (__arm64__)
+#define OOOPSI_MAC_ARM
+#endif
+
 #endif
 
 
